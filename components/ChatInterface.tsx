@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import ChatMessage from './ChatMessage'
+import { CHATBOTS } from '@/lib/chatbots'
 
 interface Message {
   id: string
@@ -11,22 +12,6 @@ interface Message {
   isUser: boolean
   timestamp: string
 }
-
-interface ChatbotConfig {
-  id: string
-  name: string
-  uuid?: string
-  endpoint: string
-}
-
-const CHATBOTS: ChatbotConfig[] = [
-  { id: '1', name: 'Uniserved Investor Chatbot', endpoint: 'https://investor.uniserved.com/api/ask/' },
-  { id: '2', name: 'Uniserved Support Chatbot', uuid: 'b2c3d4e5-f6a7-4890-b123-456789abcdef', endpoint: 'https://investor.uniserved.com/api/ask/support/' },
-  { id: '3', name: 'Uniserved Sales Chatbot', uuid: 'c3d4e5f6-a7b8-4901-c234-56789abcdef0', endpoint: 'https://investor.uniserved.com/api/ask/sales/' },
-  { id: '4', name: 'Uniserved Help Chatbot', uuid: 'd4e5f6a7-b8c9-4012-d345-6789abcdef01', endpoint: 'https://investor.uniserved.com/api/ask/help/' },
-  { id: '5', name: 'Uniserved General Chatbot', uuid: 'e5f6a7b8-c9d0-4123-e456-789abcdef012', endpoint: 'https://investor.uniserved.com/api/ask/general/' },
-  { id: '6', name: 'Uniserved Customer Chatbot', uuid: 'f6a7b8c9-d0e1-4234-f567-89abcdef0123', endpoint: 'https://investor.uniserved.com/api/ask/customer/' },
-]
 
 export default function ChatInterface() {
   const searchParams = useSearchParams()
