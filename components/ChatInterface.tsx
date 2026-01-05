@@ -69,11 +69,10 @@ export default function ChatInterface() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('https://lacey-noncomprehendible-noncritically.ngrok-free.dev/api/ask/', {
+      const response = await fetch('https://investor.uniserved.com/api/ask/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify({ question: input }),
       })
