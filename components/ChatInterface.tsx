@@ -4,7 +4,9 @@ import { useState, useRef, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import ChatMessage from './ChatMessage'
+import AccessCodeModal from './AccessCodeModal'
 import { CHATBOTS } from '@/lib/chatbots'
+import { verifyAccessCode } from '@/lib/accessCodes'
 
 interface Message {
   id: string
@@ -20,6 +22,8 @@ export default function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [isMounted, setIsMounted] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [showAccessModal, setShowAccessModal] = useState(false)
   
   // Get UUID from URL parameter and find matching chatbot
   const uuidFromUrl = searchParams.get('uuid')
@@ -42,8 +46,21 @@ export default function ChatInterface() {
     return timeString.toLowerCase()
   }
 
+  // Check authentication status on mount
+  useEffect(() => {
+    const authStatus = localStorage.getItem('chatbot_authenticated')
+    if (authStatus === 'true') {
+      setIsAuthenticated(true)
+      setIsMounted(true)
+    } else {
+      setShowAccessModal(true)
+    }
+  }, [])
+
   // Initialize welcome message only on client to avoid hydration mismatch
   useEffect(() => {
+    if (!isAuthenticated) return
+    
     setIsMounted(true)
     // Clear messages when chatbot changes (UUID in URL changes)
     setMessages([])
@@ -60,7 +77,19 @@ export default function ChatInterface() {
     }, 2000)
 
     return () => clearTimeout(timer)
-  }, [uuidFromUrl])
+  }, [uuidFromUrl, isAuthenticated])
+
+  const handleVerify = (phone: string, accessCode: string): boolean => {
+    const isValid = verifyAccessCode(phone, accessCode)
+    if (isValid) {
+      setIsAuthenticated(true)
+      setShowAccessModal(false)
+      localStorage.setItem('chatbot_authenticated', 'true')
+      localStorage.setItem('chatbot_phone', phone)
+      return true
+    }
+    return false
+  }
 
   useEffect(() => {
     scrollToBottom()
@@ -123,6 +152,16 @@ export default function ChatInterface() {
       e.preventDefault()
       handleSend()
     }
+  }
+
+  // Show access modal if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <AccessCodeModal
+        isOpen={showAccessModal}
+        onVerify={handleVerify}
+      />
+    )
   }
 
   return (
