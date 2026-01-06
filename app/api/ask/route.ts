@@ -3,11 +3,11 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { question } = body
+    const { question, phone, access_code } = body
 
-    if (!question) {
+    if (!question || !phone || !access_code) {
       return NextResponse.json(
-        { error: 'Question is required' },
+        { error: 'question, phone, and access_code are required' },
         { status: 400 }
       )
     }

@@ -25,7 +25,7 @@ export const ACCESS_CODES: Record<string, string> = {
   '1111111111': 'DEMO999',
   
   // Demo Entry 5
-  '9999999999': 'ACCESS',
+  '9999999999': 'PORT',
   
   // Add more entries as needed
 }

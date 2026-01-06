@@ -125,21 +125,29 @@ export default function ChatInterface() {
     setIsLoading(true)
 
     try {
+      // Get phone and access code from localStorage
+      const storedPhone = localStorage.getItem('chatbot_phone')
+      const storedAccessCode = localStorage.getItem('chatbot_access_code')
+      
       const response = await fetch(selectedChatbot.endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ question: input }),
+        body: JSON.stringify({ 
+          question: input,
+          phone: storedPhone || '',
+          access_code: storedAccessCode || ''
+        }),
       })
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('Server error:', response.status, errorText)
-        throw new Error('Failed to get response')
-      }
-
       const data = await response.json()
+
+      if (!response.ok) {
+        console.error('Server error:', response.status, data)
+        const errorMessage = data.error || 'Failed to get response'
+        throw new Error(errorMessage)
+      }
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: data.answer,
