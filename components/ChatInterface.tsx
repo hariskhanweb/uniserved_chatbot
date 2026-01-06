@@ -48,13 +48,26 @@ export default function ChatInterface() {
 
   // Check authentication status on mount
   useEffect(() => {
-    const authStatus = localStorage.getItem('chatbot_authenticated')
-    if (authStatus === 'true') {
-      setIsAuthenticated(true)
-      setIsMounted(true)
-    } else {
-      setShowAccessModal(true)
+    const storedPhone = localStorage.getItem('chatbot_phone')
+    const storedAccessCode = localStorage.getItem('chatbot_access_code')
+    
+    // If we have stored credentials, verify them automatically
+    if (storedPhone && storedAccessCode) {
+      const isValid = verifyAccessCode(storedPhone, storedAccessCode)
+      if (isValid) {
+        setIsAuthenticated(true)
+        setIsMounted(true)
+        return
+      } else {
+        // Stored credentials are invalid, clear them
+        localStorage.removeItem('chatbot_authenticated')
+        localStorage.removeItem('chatbot_phone')
+        localStorage.removeItem('chatbot_access_code')
+      }
     }
+    
+    // No valid stored credentials, show modal
+    setShowAccessModal(true)
   }, [])
 
   // Initialize welcome message only on client to avoid hydration mismatch
@@ -84,8 +97,10 @@ export default function ChatInterface() {
     if (isValid) {
       setIsAuthenticated(true)
       setShowAccessModal(false)
+      // Store authentication status and credentials
       localStorage.setItem('chatbot_authenticated', 'true')
       localStorage.setItem('chatbot_phone', phone)
+      localStorage.setItem('chatbot_access_code', accessCode)
       return true
     }
     return false
