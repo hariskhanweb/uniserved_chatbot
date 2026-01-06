@@ -58,7 +58,7 @@ export default function AccessCodeModal({ isOpen, onVerify }: AccessCodeModalPro
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-[#202C33] rounded-lg shadow-2xl w-full max-w-md mx-4 p-6 border border-[#2A3942]">
         <div className="mb-6">
           <h2 className="text-xl font-semibold text-white">Access Required</h2>
