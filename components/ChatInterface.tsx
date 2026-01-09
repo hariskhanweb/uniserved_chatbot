@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import ChatMessage from './ChatMessage'
 import AccessCodeModal from './AccessCodeModal'
-import { CHATBOTS } from '@/lib/chatbots'
+import { CHATBOTS, getApiEndpoint } from '@/lib/chatbots'
 import { verifyAccessCode } from '@/lib/accessCodes'
 
 interface Message {
@@ -93,17 +93,15 @@ export default function ChatInterface() {
   }, [uuidFromUrl, isAuthenticated])
 
   const handleVerify = (phone: string, accessCode: string): boolean => {
-    const isValid = verifyAccessCode(phone, accessCode)
-    if (isValid) {
-      setIsAuthenticated(true)
-      setShowAccessModal(false)
-      // Store authentication status and credentials
-      localStorage.setItem('chatbot_authenticated', 'true')
-      localStorage.setItem('chatbot_phone', phone)
-      localStorage.setItem('chatbot_access_code', accessCode)
-      return true
-    }
-    return false
+    // API has already verified authentication, so we trust it
+    // Just update the state and store credentials
+    setIsAuthenticated(true)
+    setShowAccessModal(false)
+    // Store authentication status and credentials
+    localStorage.setItem('chatbot_authenticated', 'true')
+    localStorage.setItem('chatbot_phone', phone)
+    localStorage.setItem('chatbot_access_code', accessCode)
+    return true
   }
 
   useEffect(() => {
@@ -129,7 +127,10 @@ export default function ChatInterface() {
       const storedPhone = localStorage.getItem('chatbot_phone')
       const storedAccessCode = localStorage.getItem('chatbot_access_code')
       
-      const response = await fetch(selectedChatbot.endpoint, {
+      // Build API endpoint with UUID parameter
+      const apiUrl = getApiEndpoint(selectedChatbot.uuid)
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

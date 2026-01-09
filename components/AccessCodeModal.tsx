@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 interface AccessCodeModalProps {
   isOpen: boolean
-  onVerify: (phone: string, accessCode: string) => boolean
+  onVerify: (phone: string, accessCode: string) => boolean | Promise<boolean>
   onClose?: () => void
 }
 
@@ -32,16 +32,41 @@ export default function AccessCodeModal({ isOpen, onVerify }: AccessCodeModalPro
 
     setIsVerifying(true)
     
-    // Simulate a small delay for better UX
-    setTimeout(() => {
-      const isValid = onVerify(phone.trim(), accessCode.trim())
-      setIsVerifying(false)
-      
-      if (!isValid) {
-        setError('Invalid phone number or access code. Please try again.')
+    try {
+      const response = await fetch('https://investor.uniserved.com/api/user-access/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phone: phone.trim(),
+          access_code: accessCode.trim(),
+        }),
+      })
+
+      const data = await response.json()
+
+      // Check if the API response indicates authentication success
+      if (data.is_authenticated === true) {
+        // User is authenticated, proceed with verification callback
+        // The API has already confirmed authentication, so we trust it
+        await onVerify(phone.trim(), accessCode.trim())
+        setIsVerifying(false)
+        // Modal will close automatically when parent component updates isAuthenticated state
+      } else {
+        // Authentication failed, show error message from API
+        const errorMessage = data.message || data.error || 'Invalid phone number or access code. Please try again.'
+        setError(errorMessage)
         setAccessCode('')
+        setIsVerifying(false)
       }
-    }, 500)
+    } catch (error) {
+      // Network or other error
+      console.error('Error verifying access:', error)
+      setError('Failed to verify access. Please check your connection and try again.')
+      setAccessCode('')
+      setIsVerifying(false)
+    }
   }
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
